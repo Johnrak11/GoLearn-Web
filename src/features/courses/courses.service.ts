@@ -3,17 +3,46 @@ import api from "@/lib/axios";
 export interface Course {
   id: string;
   title: string;
-  slug?: string;
   description?: string;
-  thumbnail_url: string | null;
-  price: number;
-  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
-  created_at: string;
+  course_image: string;
+  preview_video: string;
+  instructor: {
+    name: string;
+    rating: number;
+  };
+  curriculum?: CurriculumModule[];
+  pricing: {
+    amount: number;
+    currency: string;
+    discount_available: boolean;
+  };
+  tags: string[];
+  // Dashboard-only fields (from /my-courses)
+  slug?: string;
+  thumbnail_url?: string | null;
+  price?: number;
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  created_at?: string;
   modules?: Module[];
   _count?: {
     enrollments: number;
     modules: number;
   };
+}
+
+export interface CurriculumModule {
+  module_id: number;
+  title: string;
+  lessons: CurriculumLesson[];
+}
+
+export interface CurriculumLesson {
+  id: string;
+  title: string;
+  type: string;
+  duration_minutes: number;
+  video_url: string;
+  resources?: string[];
 }
 
 export interface Module {
@@ -41,8 +70,10 @@ export interface Lesson {
 
 export const coursesService = {
   // ============ Course ============
-  getMyCourses: async () => {
-    const response = await api.get<Course[]>("/courses/my-courses");
+  getMyCourses: async (search?: string) => {
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    const response = await api.get<Course[]>("/courses/my-courses", { params });
     return response.data;
   },
 
@@ -64,6 +95,11 @@ export const coursesService = {
 
   getCourseById: async (id: string) => {
     const response = await api.get<Course>(`/courses/${id}`);
+    return response.data;
+  },
+
+  getCourseByIdRaw: async (id: string) => {
+    const response = await api.get<Course>(`/courses/${id}/raw`);
     return response.data;
   },
 

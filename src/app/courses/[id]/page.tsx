@@ -56,9 +56,7 @@ export default function CourseDetailsPage() {
       queryClient.invalidateQueries({
         queryKey: ["enrollmentStatus", courseId],
       });
-      // Ideally redirect to learning page but for now stay here or redirect
-      router.push(`/dashboard/learning`); // We will build this next
-      // toast.success("Enrolled successfully!");
+      router.push(`/dashboard/learning`);
     },
     onError: (error: any) => {
       alert(error.response?.data?.message || "Failed to enroll");
@@ -90,13 +88,20 @@ export default function CourseDetailsPage() {
     );
   }
 
+  // Count total lessons from curriculum
+  const totalLessons =
+    course.curriculum?.reduce(
+      (acc: number, m: any) => acc + (m.lessons?.length || 0),
+      0,
+    ) || 0;
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header / Hero */}
       <div className="bg-slate-900 text-white pt-10 pb-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl">
-            {/* Breadcrumb replacement */}
+            {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-slate-400 mb-4">
               <span
                 className="hover:text-white cursor-pointer"
@@ -123,20 +128,25 @@ export default function CourseDetailsPage() {
             <div className="flex flex-wrap items-center gap-6 text-sm">
               <div className="flex items-center gap-1 text-yellow-500">
                 <Star className="h-4 w-4 fill-current" />
-                <span className="font-bold">4.8</span>
-                <span className="text-slate-400">(120 ratings)</span>
+                <span className="font-bold">
+                  {course.instructor?.rating || 0}
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4 text-slate-400" />
-                <span>{course._count?.enrollments || 0} students</span>
+                <span>by {course.instructor?.name || "Unknown"}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4 text-slate-400" />
-                <span>
-                  Last updated{" "}
-                  {new Date(course.created_at).toLocaleDateString()}
-                </span>
-              </div>
+
+              {/* Tags */}
+              {course.tags?.length > 0 && (
+                <div className="flex items-center gap-2">
+                  {course.tags.map((tag: string) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -158,15 +168,9 @@ export default function CourseDetailsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-bold">Course Content</h2>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-              <span>{course.modules?.length || 0} sections</span>
+              <span>{course.curriculum?.length || 0} sections</span>
               <span>•</span>
-              <span>
-                {course.modules?.reduce(
-                  (acc, m) => acc + (m.lessons?.length || 0),
-                  0,
-                ) || 0}{" "}
-                lessons
-              </span>
+              <span>{totalLessons} lessons</span>
             </div>
 
             <Accordion
@@ -174,10 +178,10 @@ export default function CourseDetailsPage() {
               collapsible
               className="w-full border rounded-lg"
             >
-              {course.modules?.map((module, index) => (
+              {course.curriculum?.map((module: any) => (
                 <AccordionItem
-                  key={module.id}
-                  value={module.id}
+                  key={module.module_id}
+                  value={`module-${module.module_id}`}
                   className="px-4"
                 >
                   <AccordionTrigger className="hover:no-underline py-4">
@@ -190,26 +194,22 @@ export default function CourseDetailsPage() {
                   </AccordionTrigger>
                   <AccordionContent className="pt-0 pb-4">
                     <div className="space-y-1">
-                      {module.lessons?.map((lesson) => (
+                      {module.lessons?.map((lesson: any) => (
                         <div
                           key={lesson.id}
                           className="flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded-md"
                         >
                           <div className="flex items-center gap-3">
-                            {lesson.type === "VIDEO" ? (
+                            {lesson.type === "video" ? (
                               <PlayCircle className="h-4 w-4 text-muted-foreground" />
                             ) : (
                               <BookOpen className="h-4 w-4 text-muted-foreground" />
                             )}
                             <span className="text-sm">{lesson.title}</span>
                           </div>
-                          <div>
-                            {lesson.is_free_preview ? (
-                              <span className="text-xs text-primary underline cursor-pointer">
-                                Preview
-                              </span>
-                            ) : (
-                              <Lock className="h-3 w-3 text-muted-foreground" />
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            {lesson.duration_minutes > 0 && (
+                              <span>{lesson.duration_minutes} min</span>
                             )}
                           </div>
                         </div>
@@ -225,17 +225,17 @@ export default function CourseDetailsPage() {
           <section>
             <h2 className="text-2xl font-bold mb-4">Instructor</h2>
             <div className="flex flex-col sm:flex-row gap-4">
-              {/* Avatar Placeholder */}
               <div className="h-24 w-24 rounded-full bg-slate-200 shrink-0" />
               <div>
-                <h3 className="font-bold text-lg">John Doe</h3>
-                <p className="text-muted-foreground text-sm mb-2">
-                  Senior Developer & Instructor
-                </p>
-                <p className="text-sm">
-                  I am a software engineer with over 10 years of experience. I
-                  love teaching what I know in a simple, practical way.
-                </p>
+                <h3 className="font-bold text-lg">
+                  {course.instructor?.name || "Unknown"}
+                </h3>
+                <div className="flex items-center gap-1 text-yellow-500 mb-2">
+                  <Star className="h-4 w-4 fill-current" />
+                  <span className="text-sm font-medium">
+                    {course.instructor?.rating || 0} rating
+                  </span>
+                </div>
               </div>
             </div>
           </section>
@@ -247,9 +247,10 @@ export default function CourseDetailsPage() {
             <div className="bg-card border rounded-lg shadow-lg overflow-hidden">
               {/* Preview Video / Image */}
               <div className="aspect-video bg-black relative flex items-center justify-center group cursor-pointer">
-                {course.thumbnail_url ? (
+                {course.course_image ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
-                    src={course.thumbnail_url}
+                    src={course.course_image}
                     alt={course.title}
                     className="w-full h-full object-cover opacity-80"
                   />
@@ -266,7 +267,9 @@ export default function CourseDetailsPage() {
 
               <div className="p-6 space-y-6">
                 <div className="text-3xl font-bold">
-                  {course.price === 0 ? "Free" : formatPrice(course.price)}
+                  {course.pricing?.amount === 0
+                    ? "Free"
+                    : formatPrice(course.pricing?.amount || 0)}
                 </div>
 
                 {isEnrolled ? (
@@ -285,7 +288,7 @@ export default function CourseDetailsPage() {
                     {enrollMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    {course.price === 0 ? "Enroll Now" : "Buy Now"}
+                    {course.pricing?.amount === 0 ? "Enroll Now" : "Buy Now"}
                   </Button>
                 )}
 
@@ -297,13 +300,7 @@ export default function CourseDetailsPage() {
                   <h4 className="font-bold">This course includes:</h4>
                   <div className="flex items-center gap-3 text-muted-foreground">
                     <PlayCircle className="h-4 w-4" />
-                    <span>
-                      {course.modules?.reduce(
-                        (acc, m) => acc + (m.lessons?.length || 0),
-                        0,
-                      ) || 0}{" "}
-                      Lessons
-                    </span>
+                    <span>{totalLessons} Lessons</span>
                   </div>
                   <div className="flex items-center gap-3 text-muted-foreground">
                     <Clock className="h-4 w-4" />

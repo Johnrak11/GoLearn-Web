@@ -34,7 +34,7 @@ export default function EditCoursePage() {
     isError,
   } = useQuery({
     queryKey: ["course", courseId],
-    queryFn: () => coursesService.getCourseById(courseId),
+    queryFn: () => coursesService.getCourseByIdRaw(courseId),
   });
 
   const [title, setTitle] = useState("");

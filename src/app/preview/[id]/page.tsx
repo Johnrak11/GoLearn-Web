@@ -35,7 +35,7 @@ export default function CoursePreviewPage() {
     isError,
   } = useQuery({
     queryKey: ["course-preview", courseId],
-    queryFn: () => coursesService.getCourseById(courseId),
+    queryFn: () => coursesService.getCourseByIdRaw(courseId),
   }) as { data: any; isLoading: boolean; isError: boolean };
 
   const toggleModule = (moduleId: string) => {

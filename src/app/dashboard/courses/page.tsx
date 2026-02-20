@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Loader2, BookOpen, Search } from "lucide-react";
 import Link from "next/link";
@@ -20,29 +20,28 @@ import { coursesService, Course } from "@/features/courses/courses.service";
 import { formatPrice } from "@/lib/utils";
 
 export default function CoursesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce: wait 400ms after user stops typing before calling API
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const {
     data: courses,
     isLoading,
     isError,
+    isFetching,
   } = useQuery({
-    queryKey: ["my-courses"],
-    queryFn: coursesService.getMyCourses,
+    queryKey: ["my-courses", debouncedSearch],
+    queryFn: () => coursesService.getMyCourses(debouncedSearch || undefined),
   });
 
-  // Client-side filtering since getMyCourses returns all instructor courses
-  const filteredCourses = useMemo(() => {
-    if (!courses || !Array.isArray(courses)) return [];
-    if (!searchQuery.trim()) return courses;
-
-    const query = searchQuery.toLowerCase();
-    return courses.filter(
-      (course: Course) =>
-        course.title.toLowerCase().includes(query) ||
-        course.description?.toLowerCase().includes(query),
-    );
-  }, [courses, searchQuery]);
+  const courseList = Array.isArray(courses) ? courses : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -66,10 +65,13 @@ export default function CoursesPage() {
         <Input
           type="search"
           placeholder="Search courses by title..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           className="pl-8"
         />
+        {isFetching && debouncedSearch && (
+          <Loader2 className="absolute right-2.5 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+        )}
       </div>
 
       {isLoading ? (
@@ -80,22 +82,22 @@ export default function CoursesPage() {
         <div className="flex h-64 items-center justify-center text-red-500">
           Failed to load courses.
         </div>
-      ) : filteredCourses.length === 0 ? (
+      ) : courseList.length === 0 ? (
         <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl bg-card border-dashed p-8 text-center animate-in fade-in-50">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
             <BookOpen className="h-6 w-6 text-muted-foreground" />
           </div>
           <h3 className="mt-4 text-lg font-semibold">
-            {searchQuery
-              ? `No courses found for "${searchQuery}"`
+            {searchInput
+              ? `No courses found for "${searchInput}"`
               : "No courses yet"}
           </h3>
           <p className="mb-4 mt-2 text-sm text-muted-foreground max-w-sm">
-            {searchQuery
+            {searchInput
               ? "Try adjusting your search term."
               : "You haven\u0027t created any courses yet. Start sharing your knowledge with the world."}
           </p>
-          {!searchQuery && (
+          {!searchInput && (
             <Link href="/dashboard/courses/create">
               <Button>
                 <Plus className="mr-2 h-4 w-4" /> Create Course
@@ -105,7 +107,7 @@ export default function CoursesPage() {
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredCourses.map((course: Course) => (
+          {courseList.map((course: Course) => (
             <Card
               key={course.id}
               className="overflow-hidden transition-all hover:shadow-lg"
