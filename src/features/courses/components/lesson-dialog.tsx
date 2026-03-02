@@ -160,6 +160,11 @@ export function LessonDialog({
                             <FileText className="mr-2 h-4 w-4" /> Text / Article
                           </div>
                         </SelectItem>
+                        <SelectItem value="QUIZ">
+                          <div className="flex items-center">
+                            <FileText className="mr-2 h-4 w-4" /> Quiz
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

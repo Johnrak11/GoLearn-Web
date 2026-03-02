@@ -5,6 +5,13 @@ export interface User {
   full_name: string;
   email: string;
   avatar_url: string | null;
+  phone: string | null;
+  date_of_birth: string | null;
+  gender: string | null;
+  bio: string | null;
+  skills: string | null;
+  address: string | null;
+  headline: string | null;
   status: "ACTIVE" | "INACTIVE" | "BANNED" | "PENDING";
   roles: string[];
   created_at: string;
@@ -23,6 +30,14 @@ export interface UsersResponse {
 
 export interface UpdateUserDto {
   full_name?: string;
+  email?: string;
+  phone?: string | null;
+  date_of_birth?: string | null;
+  gender?: string | null;
+  skills?: string | null;
+  address?: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
   status?: string;
   roles?: string[];
 }
@@ -45,6 +60,16 @@ export const usersService = {
     const response = await api.get<UsersResponse>(
       `/users?${params.toString()}`,
     );
+    return response.data;
+  },
+
+  getMe: async () => {
+    const response = await api.get<User>("/users/me");
+    return response.data;
+  },
+
+  updateMe: async (data: UpdateUserDto) => {
+    const response = await api.patch("/users/me", data);
     return response.data;
   },
 

@@ -66,6 +66,35 @@ export interface Lesson {
     duration: number;
     status: string;
   } | null;
+  quiz?: {
+    id: string;
+    title: string;
+    passing_score: number;
+  } | null;
+}
+
+export interface Quiz {
+  id: string;
+  lesson_id: string;
+  title: string;
+  passing_score: number;
+  questions: QuizQuestion[];
+}
+
+export interface QuizQuestion {
+  id: string;
+  quiz_id: string;
+  prompt: string;
+  type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SINGLE_CHOICE";
+  points: number;
+  options: QuizOption[];
+}
+
+export interface QuizOption {
+  id: string;
+  question_id: string;
+  text: string;
+  is_correct: boolean;
 }
 
 export const coursesService = {
@@ -188,6 +217,51 @@ export const coursesService = {
 
   deleteLesson: async (lessonId: string) => {
     const response = await api.delete(`/courses/lessons/${lessonId}`);
+    return response.data;
+  },
+
+  // ============ Quizzes ============
+  getQuizByLesson: async (lessonId: string) => {
+    const response = await api.get<Quiz>(`/quizzes/lesson/${lessonId}`);
+    return response.data;
+  },
+
+  createQuiz: async (
+    lessonId: string,
+    data: {
+      title: string;
+      passing_score?: number;
+      questions: {
+        prompt: string;
+        type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SINGLE_CHOICE";
+        points?: number;
+        options: { text: string; is_correct: boolean }[];
+      }[];
+    },
+  ) => {
+    const response = await api.post<Quiz>(`/quizzes/lesson/${lessonId}`, data);
+    return response.data;
+  },
+
+  updateQuiz: async (
+    quizId: string,
+    data: {
+      title?: string;
+      passing_score?: number;
+      questions?: {
+        prompt: string;
+        type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SINGLE_CHOICE";
+        points?: number;
+        options: { text: string; is_correct: boolean }[];
+      }[];
+    },
+  ) => {
+    const response = await api.patch<Quiz>(`/quizzes/${quizId}`, data);
+    return response.data;
+  },
+
+  deleteQuiz: async (quizId: string) => {
+    const response = await api.delete(`/quizzes/${quizId}`);
     return response.data;
   },
 };

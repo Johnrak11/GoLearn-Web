@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, GripVertical, Trash2, Edit2, Loader2 } from "lucide-react";
+import {
+  Plus,
+  GripVertical,
+  Trash2,
+  Edit2,
+  Loader2,
+  ClipboardList,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -13,6 +20,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { LessonDialog } from "./lesson-dialog";
+import { QuizEditor } from "./quiz-editor";
 import { coursesService } from "../courses.service";
 import type { Module, Lesson } from "../courses.service";
 
@@ -256,6 +264,24 @@ export function CurriculumEditor({
                         )}
                       </div>
                       <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        {lesson.type === "QUIZ" && (
+                          <QuizEditor
+                            lessonId={lesson.id}
+                            lessonTitle={lesson.title}
+                            courseId={courseId}
+                            hasQuiz={!!lesson.quiz}
+                            trigger={
+                              <Button
+                                variant={lesson.quiz ? "outline" : "default"}
+                                size="sm"
+                                className="h-7 text-xs gap-1"
+                              >
+                                <ClipboardList className="h-3 w-3" />
+                                {lesson.quiz ? "Edit Quiz" : "Create Quiz"}
+                              </Button>
+                            }
+                          />
+                        )}
                         <LessonDialog
                           trigger={
                             <Button
