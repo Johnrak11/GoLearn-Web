@@ -21,6 +21,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import FileUpload from "@/components/ui/file-upload";
 import { coursesService } from "@/features/courses/courses.service";
 import { CurriculumEditor } from "@/features/courses/components/curriculum-editor";
+import { ExamEditor } from "@/features/courses/components/exam-editor";
 
 export default function EditCoursePage() {
   const params = useParams();
@@ -168,6 +169,7 @@ export default function EditCoursePage() {
         <TabsList>
           <TabsTrigger value="details">Course Information</TabsTrigger>
           <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
+          <TabsTrigger value="exam">Final Exam</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="details" className="mt-6">
@@ -229,6 +231,20 @@ export default function EditCoursePage() {
             </CardHeader>
             <CardContent>
               <CurriculumEditor courseId={courseId} modules={course?.modules} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="exam" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Final Exam</CardTitle>
+              <CardDescription>
+                Create a final exam for this course. Students must complete all
+                lessons before they can take the exam.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ExamEditor courseId={courseId} />
             </CardContent>
           </Card>
         </TabsContent>
