@@ -42,6 +42,14 @@ export interface UpdateUserDto {
   roles?: string[];
 }
 
+export interface CreateUserDto {
+  full_name: string;
+  email: string;
+  password: string;
+  roles: string[];
+  status?: string;
+}
+
 export const usersService = {
   getUsers: async (
     page = 1,
@@ -83,5 +91,10 @@ export const usersService = {
 
   updateUser: async (id: string, data: UpdateUserDto) => {
     await api.put(`/users/${id}`, data);
+  },
+
+  createUser: async (data: CreateUserDto) => {
+    const response = await api.post("/users", data);
+    return response.data;
   },
 };

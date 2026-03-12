@@ -1,14 +1,14 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { LoginForm } from "@/features/auth/components/login-form";
+import { RegisterForm } from "@/features/auth/components/register-form";
 
 export const metadata: Metadata = {
-  title: "Login - GoLearn Admin",
-  description: "Login to access the dashboard",
+  title: "Register - GoLearn Admin",
+  description: "Join GoLearn as an Instructor",
 };
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left Panel — Branding */}
@@ -50,9 +50,9 @@ export default function LoginPage() {
               G
             </div>
             <div>
-              <p className="font-medium">GoLearn Admin</p>
+              <p className="font-medium">GoLearn Educators</p>
               <p className="text-sm text-white/60">
-                Course Management Dashboard
+                Join our Global Learning Network
               </p>
             </div>
           </div>
@@ -75,7 +75,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Panel — Login Form */}
+      {/* Right Panel — Register Form */}
       <div className="flex w-full lg:w-1/2 flex-col items-center justify-center px-6 py-12 bg-muted/30">
         <div className="w-full max-w-[420px] space-y-8">
           {/* Mobile logo */}
@@ -92,31 +92,31 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Welcome back
+                Join as an Educator
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Sign in to your instructor or admin account
+                Create a new instructor account to start teaching
               </p>
             </div>
           </div>
 
-          {/* Login card */}
+          {/* Register card */}
           <div className="rounded-2xl bg-card text-card-foreground shadow-xl ring-1 ring-black/5 p-8">
-            <LoginForm />
+            <RegisterForm />
           </div>
 
           <div className="text-center text-sm text-muted-foreground mt-4">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/register"
+              href="/login"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              Sign up
+              Sign in
             </Link>
           </div>
 
           <p className="text-center text-xs text-muted-foreground">
-            By signing in, you agree to our{" "}
+            By signing up, you agree to our{" "}
             <Link
               href="/terms"
               className="underline underline-offset-4 hover:text-primary font-medium"

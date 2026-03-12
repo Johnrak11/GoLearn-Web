@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usersService, User } from "@/features/users/users.service";
 import { EditUserDialog } from "@/features/users/components/edit-user-dialog";
+import { AddUserDialog } from "@/features/users/components/add-user-dialog";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -48,6 +49,7 @@ export default function UsersPage() {
   const [searchDebounce, setSearchDebounce] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["users", page, searchDebounce],
@@ -62,7 +64,8 @@ export default function UsersPage() {
         <ShieldAlert className="h-16 w-16 text-destructive/50" />
         <h2 className="text-xl font-semibold">Access Denied</h2>
         <p className="text-muted-foreground text-center max-w-md">
-          You don&apos;t have permission to view this page. Only administrators can manage users.
+          You don&apos;t have permission to view this page. Only administrators
+          can manage users.
         </p>
         <Button onClick={() => router.push("/dashboard")}>
           Go to Dashboard
@@ -74,28 +77,28 @@ export default function UsersPage() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
     const timeoutId = setTimeout(() => {
-        setSearchDebounce(e.target.value);
-        setPage(1); 
+      setSearchDebounce(e.target.value);
+      setPage(1);
     }, 500);
     return () => clearTimeout(timeoutId);
   };
 
   const handleDelete = async (id: string) => {
-      if(confirm("Are you sure you want to delete this user?")) {
-          await usersService.deleteUser(id);
-          refetch();
-      }
-  }
+    if (confirm("Are you sure you want to delete this user?")) {
+      await usersService.deleteUser(id);
+      refetch();
+    }
+  };
 
   const handleStatusChange = async (id: string, status: string) => {
-      await usersService.updateUserStatus(id, status);
-      refetch();
-  }
+    await usersService.updateUserStatus(id, status);
+    refetch();
+  };
 
   const handleEdit = (user: User) => {
-      setSelectedUser(user);
-      setIsEditDialogOpen(true);
-  }
+    setSelectedUser(user);
+    setIsEditDialogOpen(true);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -106,22 +109,22 @@ export default function UsersPage() {
             Manage your students and instructors.
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Add User
         </Button>
       </div>
 
       <div className="flex items-center justify-between gap-4">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search users..."
-              className="pl-8"
-              value={search}
-              onChange={handleSearch}
-            />
-          </div>
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search users..."
+            className="pl-8"
+            value={search}
+            onChange={handleSearch}
+          />
+        </div>
       </div>
 
       <div className="rounded-xl bg-card shadow-md overflow-hidden">
@@ -142,13 +145,17 @@ export default function UsersPage() {
               <TableRow>
                 <TableCell colSpan={7} className="h-24 text-center">
                   <div className="flex justify-center items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Loading users...
+                    <Loader2 className="h-4 w-4 animate-spin" /> Loading
+                    users...
                   </div>
                 </TableCell>
               </TableRow>
             ) : isError ? (
-               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-red-500">
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="h-24 text-center text-red-500"
+                >
                   Failed to load users.
                 </TableCell>
               </TableRow>
@@ -163,26 +170,43 @@ export default function UsersPage() {
                 <TableRow key={user.id}>
                   <TableCell>
                     <Avatar className="h-9 w-9">
-                      <AvatarImage src={user.avatar_url || ""} alt={user.full_name} />
-                      <AvatarFallback>{user.full_name.charAt(0).toUpperCase()}</AvatarFallback>
+                      <AvatarImage
+                        src={user.avatar_url || ""}
+                        alt={user.full_name}
+                      />
+                      <AvatarFallback>
+                        {user.full_name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                   </TableCell>
-                  <TableCell className="font-medium">{user.full_name}</TableCell>
+                  <TableCell className="font-medium">
+                    {user.full_name}
+                  </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
-                        {user.roles.map(role => (
-                            <Badge key={role} variant="outline" className="capitalize">
-                                {role}
-                            </Badge>
-                        ))}
+                      {user.roles.map((role) => (
+                        <Badge
+                          key={role}
+                          variant="outline"
+                          className="capitalize"
+                        >
+                          {role}
+                        </Badge>
+                      ))}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge 
-                        variant={user.status === 'ACTIVE' ? 'default' : user.status === 'BANNED' ? 'destructive' : 'secondary'}
+                    <Badge
+                      variant={
+                        user.status === "ACTIVE"
+                          ? "default"
+                          : user.status === "BANNED"
+                            ? "destructive"
+                            : "secondary"
+                      }
                     >
-                        {user.status}
+                      {user.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -198,19 +222,31 @@ export default function UsersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.id)}>
+                        <DropdownMenuItem
+                          onClick={() => navigator.clipboard.writeText(user.id)}
+                        >
                           Copy User ID
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={() => handleEdit(user)}>
-                            <UserCog className="mr-2 h-4 w-4" />
-                            Edit Details
+                          <UserCog className="mr-2 h-4 w-4" />
+                          Edit Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleStatusChange(user.id, user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')}>
-                           <ArrowUpDown className="mr-2 h-4 w-4" />
-                           {user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                        <DropdownMenuItem
+                          onSelect={() =>
+                            handleStatusChange(
+                              user.id,
+                              user.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+                            )
+                          }
+                        >
+                          <ArrowUpDown className="mr-2 h-4 w-4" />
+                          {user.status === "ACTIVE" ? "Deactivate" : "Activate"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600" onSelect={() => handleDelete(user.id)}>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onSelect={() => handleDelete(user.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete User
                         </DropdownMenuItem>
@@ -223,7 +259,7 @@ export default function UsersPage() {
           </TableBody>
         </Table>
       </div>
-      
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
@@ -244,13 +280,21 @@ export default function UsersPage() {
         </Button>
       </div>
 
-      <EditUserDialog 
-        open={isEditDialogOpen} 
-        onOpenChange={setIsEditDialogOpen} 
-        user={selectedUser} 
+      <EditUserDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        user={selectedUser}
         onSuccess={() => {
-            refetch();
-            setSelectedUser(null);
+          refetch();
+          setSelectedUser(null);
+        }}
+      />
+
+      <AddUserDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSuccess={() => {
+          refetch();
         }}
       />
     </div>

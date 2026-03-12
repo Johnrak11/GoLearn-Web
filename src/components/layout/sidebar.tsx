@@ -10,6 +10,7 @@ import {
   BookOpen,
   Settings,
   LogOut,
+  DollarSign,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -42,6 +43,12 @@ const sidebarItems = [
     roles: ["admin", "instructor"],
   },
   {
+    title: "Earnings & Payouts",
+    href: "/dashboard/withdrawals",
+    icon: DollarSign,
+    roles: ["admin", "instructor"],
+  },
+  {
     title: "Browse Courses",
     href: "/",
     icon: BookOpen,
@@ -68,7 +75,11 @@ export function Sidebar() {
 
   // Filter sidebar items by role
   const visibleItems = sidebarItems.filter((item) => {
-    if (isAdmin) return true; // Admin sees everything
+    if (isAdmin) {
+      // Admin sees everything except student-only features like "Browse Courses"
+      if (item.title === "Browse Courses") return false;
+      return true;
+    }
     if (isInstructor) return item.roles.includes("instructor");
     if (isStudent) return item.roles.includes("student");
     return false;
