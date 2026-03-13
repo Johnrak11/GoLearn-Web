@@ -5,6 +5,8 @@ export interface AdminStats {
   activeCourses: number;
   totalEnrollments: number;
   totalRevenue: number;
+  monthlyEnrollments: { month: string; count: number }[];
+  topCourses: { title: string; students: number }[];
   growth: {
     users: string;
     courses: string;
@@ -17,6 +19,8 @@ export interface InstructorStats {
   totalStudents: number;
   activeCourses: number;
   totalEarnings: number;
+  monthlyEnrollments: { month: string; count: number }[];
+  topCourses: { title: string; students: number }[];
   growth: {
     students: string;
     revenue: string;
