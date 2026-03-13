@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GoLearn Admin",
-  description: "Admin Dashboard for GoLearn Platform",
+  title: "DevAcademy Admin",
+  description: "Admin Dashboard for DevAcademy Platform",
 };
 
 export default function RootLayout({

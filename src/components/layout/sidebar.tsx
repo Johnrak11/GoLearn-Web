@@ -76,8 +76,9 @@ export function Sidebar() {
   // Filter sidebar items by role
   const visibleItems = sidebarItems.filter((item) => {
     if (isAdmin) {
-      // Admin sees everything except student-only features like "Browse Courses"
-      if (item.title === "Browse Courses") return false;
+      // Admin sees everything except student-only features
+      if (item.title === "Browse Courses" || item.title === "My Learning")
+        return false;
       return true;
     }
     if (isInstructor) return item.roles.includes("instructor");
@@ -97,7 +98,7 @@ export function Sidebar() {
             height={24}
             className="mr-2 h-6 w-6"
           />
-          GoLearn
+          DevAcademy
         </div>
       </div>
     );
@@ -108,12 +109,12 @@ export function Sidebar() {
       <div className="flex h-16 items-center px-6 font-bold text-lg text-primary">
         <Image
           src="/logo.png"
-          alt="GoLearn"
+          alt="DevAcademy"
           width={24}
           height={24}
-          className="mr-2 h-6 w-6"
+          className="mr-2 h-6 w-6 brightness-0 invert"
         />
-        {isAdmin ? "GoAdmin" : isInstructor ? "GoTeacher" : "GoStudent"}
+        {isAdmin ? "DevAdmin" : isInstructor ? "DevTeacher" : "DevStudent"}
       </div>
       <div className="flex-1 overflow-auto py-4">
         <nav className="grid items-start px-4 text-sm font-medium lg:px-6 gap-2">

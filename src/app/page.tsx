@@ -60,8 +60,8 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Join thousands of students learning effectively on GoLearn. Access
-            high-quality courses from expert instructors.
+            Join thousands of students learning effectively on DevAcademy.
+            Access high-quality courses from expert instructors.
           </p>
           <div className="pt-4 flex justify-center gap-4">
             <Button size="lg" className="rounded-full px-8">
@@ -103,7 +103,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-12 bg-muted/10">
         <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          © 2024 GoLearn Inc. All rights reserved.
+          © {new Date().getFullYear()} DevAcademy Inc. All rights reserved.
         </div>
       </footer>
     </div>

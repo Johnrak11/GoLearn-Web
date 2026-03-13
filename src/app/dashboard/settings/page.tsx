@@ -127,7 +127,10 @@ export default function SettingsPage() {
                   <FormItem>
                     <FormLabel>Merchant Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. GoLearn Platform" {...field} />
+                      <Input
+                        placeholder="e.g. DevAcademy Platform"
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>
                       The name that will appear on the student's banking app.

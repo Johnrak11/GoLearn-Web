@@ -37,6 +37,6 @@ export const enrollmentService = {
       "/enrollments/my-courses",
       { params },
     );
-    return response.data.data;
+    return response.data.data || [];
   },
 };
