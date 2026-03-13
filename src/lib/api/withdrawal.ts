@@ -30,13 +30,25 @@ export interface EarningSummary {
   records: EarningRecord[];
 }
 
+export interface KHQRConfig {
+  id: string;
+  instructor_id: string;
+  bakong_account_id: string;
+  merchant_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface WithdrawalRequest {
   id: string;
   instructor_id: string;
   amount: number;
+  method: "MANUAL" | "KHQR";
   bank_name?: string;
   account_number?: string;
   account_name?: string;
+  khqr_config_id?: string;
+  khqr_config?: KHQRConfig;
   note?: string;
   status: "PENDING" | "APPROVED" | "REJECTED" | "PAID";
   admin_note?: string;
@@ -46,6 +58,7 @@ export interface WithdrawalRequest {
     id: string;
     full_name: string;
     email: string;
+    avatar_url?: string;
   };
 }
 
@@ -64,8 +77,7 @@ export const withdrawalApi = {
   },
 
   requestWithdrawal: async (data: {
-    amount?: number; // Backend schema doesn't strictly require amount if we just withdraw all, but let's see. Wait, withdrawalController doesn't take amount? It withdraws all available?
-    // Actually looking at withdrawalService, the amount might be auto-calculated from all PENDING earnings.
+    method?: "MANUAL" | "KHQR";
     bank_name?: string;
     account_number?: string;
     account_name?: string;
@@ -80,6 +92,24 @@ export const withdrawalApi = {
 
   getMyWithdrawals: async (): Promise<WithdrawalRequest[]> => {
     const response = await api.get<WithdrawalRequest[]>("/withdrawals/my");
+    return response.data;
+  },
+
+  getKHQRConfig: async (): Promise<KHQRConfig | null> => {
+    const response = await api.get<KHQRConfig | null>(
+      "/withdrawals/khqr-config",
+    );
+    return response.data;
+  },
+
+  saveKHQRConfig: async (data: {
+    bakong_account_id: string;
+    merchant_name: string;
+  }): Promise<KHQRConfig> => {
+    const response = await api.post<KHQRConfig>(
+      "/withdrawals/khqr-config",
+      data,
+    );
     return response.data;
   },
 
@@ -99,6 +129,15 @@ export const withdrawalApi = {
     const response = await api.patch<WithdrawalRequest>(
       `/withdrawals/${id}`,
       data,
+    );
+    return response.data;
+  },
+
+  generateWithdrawalKHQR: async (
+    id: string,
+  ): Promise<{ qr_string: string; md5: string }> => {
+    const response = await api.get<{ qr_string: string; md5: string }>(
+      `/withdrawals/${id}/khqr`,
     );
     return response.data;
   },

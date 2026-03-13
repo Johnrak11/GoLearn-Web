@@ -33,10 +33,9 @@ export const enrollmentService = {
 
   getMyEnrollments: async (status?: "in_progress" | "completed") => {
     const params = status ? { status } : {};
-    const response = await api.get<{ data: Enrollment[] }>(
-      "/enrollments/my-courses",
-      { params },
-    );
-    return response.data.data || [];
+    const response = await api.get<Enrollment[]>("/enrollments/my-courses", {
+      params,
+    });
+    return response.data || [];
   },
 };

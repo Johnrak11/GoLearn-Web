@@ -3,10 +3,24 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { Loader2, ArrowLeft, Trash2, Eye } from "lucide-react";
+import {
+  Loader2,
+  ArrowLeft,
+  Trash2,
+  Eye,
+  Tag as TagIcon,
+  LayoutGrid,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -42,6 +56,12 @@ export default function EditCoursePage() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);
   const [imageUrl, setImageUrl] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+
+  const { data: availableTags } = useQuery({
+    queryKey: ["tags"],
+    queryFn: () => coursesService.getTags(),
+  });
 
   useEffect(() => {
     if (course) {
@@ -49,6 +69,9 @@ export default function EditCoursePage() {
       setDescription(course.description || "");
       setPrice(Number(course.price) || 0);
       setImageUrl(course.thumbnail_url || "");
+      // Extract the first tag name as the primary category
+      const firstTag = course.tags?.[0]?.tag?.name || "";
+      setSelectedCategory(firstTag);
     }
   }, [course]);
 
@@ -59,6 +82,7 @@ export default function EditCoursePage() {
       description?: string;
       price?: number;
       image_url?: string;
+      tags?: string[];
     }) => coursesService.updateCourse(courseId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["course", courseId] });
@@ -86,7 +110,13 @@ export default function EditCoursePage() {
   });
 
   const onSave = () => {
-    updateCourse({ title, description, price, image_url: imageUrl });
+    updateCourse({
+      title,
+      description,
+      price,
+      image_url: imageUrl,
+      tags: selectedCategory ? [selectedCategory] : [],
+    });
   };
 
   const currentStatus = course?.status || "DRAFT";
@@ -210,6 +240,24 @@ export default function EditCoursePage() {
                     value={price.toString()}
                     onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
                   />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Category (For Mobile Filtering)</Label>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTags?.map((tag) => (
+                        <SelectItem key={tag.id} value={tag.name}>
+                          {tag.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="flex justify-end">

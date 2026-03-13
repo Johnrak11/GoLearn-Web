@@ -9,7 +9,20 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -35,6 +48,7 @@ const createCourseSchema = z.object({
     message: "Price must be a positive number.",
   }),
   imageUrl: z.string().optional(),
+  category: z.string().optional(),
 });
 
 type CreateCourseValues = z.infer<typeof createCourseSchema>;
@@ -43,6 +57,11 @@ export default function CreateCoursePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
+  const { data: availableTags } = useQuery({
+    queryKey: ["tags"],
+    queryFn: () => coursesService.getTags(),
+  });
+
   const form = useForm<CreateCourseValues>({
     resolver: zodResolver(createCourseSchema) as any,
     defaultValues: {
@@ -50,6 +69,7 @@ export default function CreateCoursePage() {
       description: "",
       price: 0,
       imageUrl: "",
+      category: "",
     },
   });
 
@@ -57,7 +77,13 @@ export default function CreateCoursePage() {
     console.log("Submitting course:", values);
     setIsLoading(true);
     try {
-      const course = await coursesService.createCourse(values);
+      const course = await coursesService.createCourse({
+        title: values.title,
+        description: values.description,
+        price: values.price,
+        image_url: values.imageUrl,
+        tags: values.category ? [values.category] : [],
+      });
       router.push(`/dashboard/courses/${course.id}`);
     } catch (error) {
       console.error(error);
@@ -98,7 +124,10 @@ export default function CreateCoursePage() {
                   <FormItem>
                     <FormLabel>Course Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Advanced React Patterns" {...field} />
+                      <Input
+                        placeholder="e.g. Advanced React Patterns"
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>
                       What will you teach in this course?
@@ -114,9 +143,9 @@ export default function CreateCoursePage() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <RichTextEditor 
-                        value={field.value} 
-                        onChange={field.onChange} 
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
                         placeholder="Tell students what they will learn..."
                         className="min-h-[150px]"
                       />
@@ -138,8 +167,36 @@ export default function CreateCoursePage() {
                       <FormControl>
                         <Input type="number" step="0.01" {...field} />
                       </FormControl>
+                      <FormDescription>Set to 0 for free.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category (For Mobile Filtering)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableTags?.map((tag) => (
+                            <SelectItem key={tag.id} value={tag.name}>
+                              {tag.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormDescription>
-                        Set to 0 for free.
+                        Helps students find your course.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -168,10 +225,14 @@ export default function CreateCoursePage() {
               />
               <div className="flex justify-end gap-4 pt-4 border-t">
                 <Link href="/dashboard/courses">
-                  <Button type="button" variant="ghost">Cancel</Button>
+                  <Button type="button" variant="ghost">
+                    Cancel
+                  </Button>
                 </Link>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Create Course
                 </Button>
               </div>
@@ -182,4 +243,3 @@ export default function CreateCoursePage() {
     </div>
   );
 }
-

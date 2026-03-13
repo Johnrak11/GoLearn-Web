@@ -97,6 +97,15 @@ export interface QuizOption {
   is_correct: boolean;
 }
 
+export interface RawCourse extends Omit<Course, "tags"> {
+  tags: {
+    tag: {
+      id: string;
+      name: string;
+    };
+  }[];
+}
+
 export const coursesService = {
   // ============ Course ============
   getMyCourses: async (search?: string) => {
@@ -117,6 +126,7 @@ export const coursesService = {
     description: string;
     price: number;
     image_url?: string;
+    tags?: string[];
   }) => {
     const response = await api.post("/courses", data);
     return response.data;
@@ -128,7 +138,7 @@ export const coursesService = {
   },
 
   getCourseByIdRaw: async (id: string) => {
-    const response = await api.get<Course>(`/courses/${id}/raw`);
+    const response = await api.get<RawCourse>(`/courses/${id}/raw`);
     return response.data;
   },
 
@@ -139,6 +149,7 @@ export const coursesService = {
       description?: string;
       price?: number;
       image_url?: string;
+      tags?: string[];
     },
   ) => {
     const response = await api.patch(`/courses/${id}`, data);
@@ -155,6 +166,12 @@ export const coursesService = {
     status: "PUBLISHED" | "DRAFT" | "ARCHIVED",
   ) => {
     const response = await api.patch(`/courses/${id}/status`, { status });
+    return response.data;
+  },
+
+  // ============ Tags ============
+  getTags: async () => {
+    const response = await api.get<{ id: string; name: string }[]>("/tags");
     return response.data;
   },
 
